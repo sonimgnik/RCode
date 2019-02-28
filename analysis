@@ -1,0 +1,92 @@
+
+##Directions
+
+#Please run this script using the Source button on the top right.
+#Input your working directory on line 16.
+#Input your file name on line 24.
+
+library(stringr)
+library(data.table)
+library("sqldf")
+
+cat("Welcome to the DC Bike Share analysis script. \n")
+Sys.sleep(2)
+cat("R will now prepare your data for you. \n")
+cat("\n")
+#name directory as a value
+wd <- "/Users/nick/Documents/Syracuse MSBA/2019-0109 IST 687 Applied Data Science/Final Project/2018 Bike Share Data/"
+
+#set working diectory and view contents
+setwd(wd)
+getwd()
+list.files()
+
+alldata <- read.csv("2018_data.csv")
+#head(alldata)
+cat("\n")
+cat("Your data has loaded successfully.\n")
+
+Sys.sleep(2)
+cat("R will now clean the data for anlaysis.\n")
+cat("\n")
+Sys.sleep(2)
+## Separate day and time fields and delete original fields ##
+startd<-str_split_fixed(alldata$Start.date, " ",2)
+alldata$StartDate <- startd[,1]
+alldata$StartTime <- startd[,2]
+endd <- str_split_fixed(alldata$End.date, " ", 2)
+alldata$EndDate <- endd[,1]
+alldata$EndTime <- endd[,2]
+alldata <- within(alldata,rm(Start.date, End.date))
+alldata <- alldata[c(1,7,9,10,11,12,2,4,3,6,5,8)] #rearrange columns
+cat("\n")
+cat("The data is ready for analysis.\n")
+Sys.sleep(1)
+cat("\n")
+cat("R is preparing a random sample from the dataframe and analyzing the sample.\n")
+Sys.sleep(3)
+cat("\n")
+#pull random sample for testing and assign to new dataframe
+library(dplyr)
+df <- sample_n(alldata,5000) 
+df<- df[,-(1)] #remove unwanted column 
+b = nrow(df)
+
+library(plyr)
+BikeCount <- count(df, "Bike.number")
+a = nrow(BikeCount)
+
+B.avg <- mean(df$Duration)
+B.min <- min(df$Duration)
+B.max <- max(df$Duration)
+
+StartStation <- count(df, "Start.station.number")
+mean(StartStation$freq)
+
+EndStation <- count(df, "End.station.number")
+mean(EndStation$freq)
+
+#Describe the data:
+cat("Here is the summarization of your data:\n")
+cat("\n")
+cat('The sample size for this data is', b , 'data points.\n') 
+cat("\n")
+cat('The number of bikes evaluated in this dataset are', a , 'bikes.\n') 
+cat("\n")
+cat('The AVG duration a bike was used in 2018 was:', round(B.avg,2) , 'minutes.\n') 
+cat("\n")
+cat('The minimum duration a bike was used in 2018 was:', round(B.min, 2), 'minutes.\n')
+cat("\n")
+cat('The maximum duration a bike was used in 2018 was:', round(B.max,2), 'minutes.\n')
+cat("\n")
+
+#What are the most popular stations find like most popular stations?  What has the highest count?
+
+#What are the most popular start and end combo's?
+
+#What is the average usage?
+
+#What is below average?  What may indicate non-essential?
+
+#What bikes are highest mileage and may indicate need to replacement or servicing?
+
