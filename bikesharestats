@@ -1,0 +1,310 @@
+
+#Input your working directory on line 16.
+#Input your file name on line 24.
+
+library(stringr)
+library(data.table)
+library("sqldf")
+
+cat("Welcome to the DC Bike Share analysis script. \n")
+Sys.sleep(2)
+cat("R will now prepare your data for you. \n")
+cat("\n")
+#name directory as a value
+wd <- "/Users/nick/Documents/Syracuse MSBA/2019-0109 IST 687 Applied Data Science/Final Project/Project_Data/"
+
+#set working diectory and view contents
+setwd(wd)
+getwd()
+list.files()
+
+alldata <- read.csv("2018_data.csv")
+#head(alldata)
+cat("\n")
+alldata_2017 <- read.csv("2017_data.csv")
+#head(alldata_2017)
+cat("\n")
+alldata_2016 <- read.csv("2016_data.csv")
+#head(alldata_2016)
+cat("\n")
+cat("Your data has loaded successfully.\n")
+
+Sys.sleep(2)
+cat("R will now clean the data for anlaysis.\n")
+cat("\n")
+Sys.sleep(2)
+## Separate day and time fields and delete original fields ##
+startd<-str_split_fixed(alldata$Start.date, " ",2)
+alldata$StartDate <- startd[,1]
+alldata$StartTime <- startd[,2]
+endd <- str_split_fixed(alldata$End.date, " ", 2)
+alldata$EndDate <- endd[,1]
+alldata$EndTime <- endd[,2]
+alldata <- within(alldata,rm(Start.date, End.date))
+alldata <- alldata[c(1,7,9,10,11,12,2,4,3,6,5,8)] #rearrange columns
+cat("\n")
+Sys.sleep(2)
+
+## Separate day and time fields and delete original fields ##
+startd<-str_split_fixed(alldata_2017$Start.date, " ",2)
+alldata_2017$StartDate <- startd[,1]
+alldata_2017$StartTime <- startd[,2]
+endd <- str_split_fixed(alldata_2017$End.date, " ", 2)
+alldata_2017$EndDate <- endd[,1]
+alldata_2017$EndTime <- endd[,2]
+alldata_2017 <- within(alldata_2017,rm(Start.date, End.date))
+alldata_2017 <- alldata_2017[c(1,7,9,10,11,12,2,4,3,6,5,8)] #rearrange columns
+cat("\n")
+Sys.sleep(2)
+
+## Separate day and time fields and delete original fields ##
+startd<-str_split_fixed(alldata_2016$Start.date, " ",2)
+alldata_2016$StartDate <- startd[,1]
+alldata_2016$StartTime <- startd[,2]
+endd <- str_split_fixed(alldata_2016$End.date, " ", 2)
+alldata_2016$EndDate <- endd[,1]
+alldata_2016$EndTime <- endd[,2]
+alldata_2016 <- within(alldata_2016,rm(Start.date, End.date))
+alldata_2016 <- alldata_2016[c(1,7,9,10,11,12,2,4,3,6,5,8)] #rearrange columns
+cat("\n")
+cat("The data is ready for analysis.\n")
+Sys.sleep(1)
+cat("\n")
+
+cat("R is preparing a comparative analysis between data sets by year.\n")
+Sys.sleep(3)
+cat("\n")
+
+#Comparative Graph:
+x <- nrow(alldata)
+y <- nrow(alldata_2017)
+z <- nrow(alldata_2016)
+counts <- c(z, y, x)
+years <- c('2016', '2017', '2018')
+compare <- data.frame(counts, years, stringsAsFactors=FALSE)
+
+cat('The total number of observations in 2018 are', x, '.\n')
+cat("\n")
+cat('The total number of observations in 2017 are', y, '.\n')
+cat("\n")
+cat('The total number of observations in 2016 are', z, '.\n')
+cat("\n")
+
+cat("Here is a horizontal chart comparing the total rides per year between 2016 
+    and 2018:\n")
+cat("\n")
+# Simple Horizontal Bar Plot with Added Labels 
+counts.bar <- table(compare$counts)
+barplot(counts, main="Total Rides per Year", horiz=TRUE, col=c("darkblue"),
+        names.arg=c("2016", "2017", "2018"))
+
+rm(alldata_2016)
+
+####################################Begin Sample################################
+
+cat("R is preparing a small random sample from the dataframe and analyzing the 
+    sample.\n")
+Sys.sleep(3)
+cat("\n")
+
+#pull random sample for testing and assign to new dataframe
+library(dplyr)
+df.small <- sample_n(alldata,5000) 
+df.small<- df.small[,-(1)] #remove unwanted column 
+b = nrow(df.small)
+
+library(plyr)
+BikeCount <- count(df.small, "Bike.number")
+a = nrow(BikeCount)
+
+B.avg <- mean(df.small$Duration)
+B.min <- min(df.small$Duration)
+B.max <- max(df.small$Duration)
+
+StartStation_s <- count(df.small, "Start.station.number")
+mean(StartStation_s$freq)
+
+EndStation_s <- count(df.small, "End.station.number")
+mean(EndStation_s$freq)
+
+#Describe the data:
+cat("Here is the summarization of your data:\n")
+cat("\n")
+cat('The sample size for this data is', b , 'data points.\n') 
+cat("\n")
+cat('The number of bikes evaluated in this dataset are', a , 'bikes.\n') 
+cat("\n")
+cat('The AVG duration a bike was used in 2018 was:', round(B.avg,2) , 'seconds.\n') 
+cat("\n")
+cat('The minimum duration a bike was used in 2018 was:', round(B.min, 2), 'seconds.\n')
+cat("\n")
+cat('The maximum duration a bike was used in 2018 was:', round(B.max,2), 'seconds.\n')
+cat("\n")
+
+cat("R is preparing a large random sample from the dataframe and analyzing the 
+    sample.\n")
+Sys.sleep(3)
+cat("\n")
+
+#pull random sample for testing and assign to new dataframe
+library(dplyr)
+df.large <- sample_n(alldata,20000) 
+df.large<- df.large[,-(1)] #remove unwanted column 
+b = nrow(df.large)
+
+library(plyr)
+BikeCount <- count(df.large, "Bike.number")
+a = nrow(BikeCount)
+
+B.avg <- mean(df.large$Duration)
+B.min <- min(df.large$Duration)
+B.max <- max(df.large$Duration)
+
+StartStation_l <- count(df.large, "Start.station.number")
+mean(StartStation_l$freq)
+
+EndStation_l <- count(df.large, "End.station.number")
+mean(EndStation_l$freq)
+
+#Describe the data:
+cat("Here is the summarization of your data:\n")
+cat("\n")
+cat('The sample size for this data is', b , 'data points.\n') 
+cat("\n")
+cat('The number of bikes evaluated in this dataset are', a , 'bikes.\n') 
+cat("\n")
+cat('The AVG duration a bike was used in 2018 was:', round(B.avg,2) , 'seconds.\n') 
+cat("\n")
+cat('The minimum duration a bike was used in 2018 was:', round(B.min, 2), 'seconds.\n')
+cat("\n")
+cat('The maximum duration a bike was used in 2018 was:', round(B.max,2), 'seconds.\n')
+cat("\n")
+
+cat("R is analyzing the entire dataframe.\n")
+Sys.sleep(3)
+cat("R is thinking.\n")
+Sys.sleep(2)
+cat("\n")
+
+##################################End Sample#####################
+
+#pull all data and assign to new dataframe
+library(dplyr)
+df.all <- alldata 
+df.all<- df.all[,-(1)] #remove unwanted column 
+p = nrow(df.all)
+
+library(plyr)
+BikeCount <- count(df.all, "Bike.number")
+l = nrow(BikeCount)
+
+C.avg <- mean(df.all$Duration)
+C.min <- min(df.all$Duration)
+C.max <- max(df.all$Duration)
+
+StartStation <- count(df.all, "Start.station.number")
+mean(StartStation$freq)
+
+EndStation <- count(df.all, "End.station.number")
+mean(EndStation$freq)
+
+#StartStationGp <- df.all %>% group_by(Start.station)
+
+StartStationLoc <- count(df.all, "Start.station")
+EndStationLoc <- count(df.all, "End.station")
+
+StartStationTime <- count(df.all, "StartTime")
+EndStationTime <- count(df.all, "EndTime")
+
+StartStationDate <- count(df.all, "StartDate")
+EndStationDate <- count(df.all, "EndDate")
+
+StartStationDate <- count(df.all, "StartDate")
+EndStationDate <- count(df.all, "EndDate")
+
+BikeNumberCount <- count(df.all, "Bike.number")
+
+MemberCount <- count(df.all, "Member.type")
+
+#Describe the data:
+cat("Here is the summarization of the entire data set for 2018:\n")
+cat("\n")
+cat('The number of bikes evaluated in this dataset are', l , 'bikes.\n') 
+cat("\n")
+cat('The AVG duration a bike was used in 2018 was:', round(C.avg,2) , 'seconds.\n') 
+cat("\n")
+cat('The minimum duration a bike was used in 2018 was:', round(C.min, 2), 'seconds.\n')
+cat("\n")
+cat('The maximum duration a bike was used in 2018 was:', round(C.max,2), 'seconds.\n')
+cat("\n")
+cat('The maximum duration a bike was used in 2018 was:', round(C.max,2), 'seconds.\n')
+cat("\n")
+cat('Here is a histogram depicting the duration times for each trip.\n')
+cat("\n")
+
+print(summary(alldata$Duration))
+
+quantile(alldata$Duration, c(0.25, 0.5, 0.75), type = 1)
+
+cat('R has finished processing this request.\n')
+
+
+
+####################most popular and least popular bikes#####################
+
+library(dplyr)
+cat("The most used bikes in 2018 are:\n")
+
+bike.most <- top_n(count(alldata$Bike.number), 25)
+print(bike.most)
+
+cat("The least used bikes in 2018 are:\n")
+
+bike.least <- top_n(count(alldata$Bike.number), -25)
+print(bike.least)
+
+
+####################most popular and least popular stations#####################
+library(dplyr)
+cat("There are", nrow(StartStation), "stations", "in the 2018 dataset.\n")
+cat("The 25 most popular starting stations are:\n")
+
+BestStartStation <- (top_n(count(alldata$Start.station), 25))
+BestStartStation <- BestStartStation[order(-BestStartStation$freq) , ]
+rownames(BestStartStation) <- NULL
+print(BestStartStation)
+
+cat("The 25 most popular ending stations are:\n")
+
+BestEndStation <- (top_n(count(alldata$End.station), 25))
+BestEndStation <- BestEndStation[order(-BestEndStation$freq) , ]
+rownames(BestEndStation) <- NULL
+print(BestEndStation)
+
+cat("The 25 least popular starting stations are:\n")
+
+LeastStartStation <- (top_n(count(alldata$Start.station), -25))
+LeastStartStation <- LeastStartStation[order(LeastStartStation$freq) , ]
+rownames(LeastStartStation) <- NULL
+print(LeastStartStation)
+
+cat("The 25 least popular ending stations are:\n")
+
+LeastEndStation <- (top_n(count(alldata$End.station), -25))
+LeastEndStation <- LeastEndStation[order(LeastEndStation$freq) , ]
+rownames(LeastEndStation) <- NULL
+print(LeastEndStation)
+
+#The code above can be done in 1 line, as follows:
+#print(top_n(count(alldata$Start.station), -25))
+
+#################################average usage##################################
+
+cat("What is the average usage? \n")
+cat("\n")
+cat('The AVG duration a bike was used in 2018 was:', round(C.avg,2),'seconds.\n') 
+cat('This converts to ', round(C.avg/60,2),'minutes.\n') 
+cat("\n")
+
+
+
